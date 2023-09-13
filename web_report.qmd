@@ -9,8 +9,6 @@ echo: FALSE
 message: FALSE
 ---
 
-# Main Header
-
 ```{r, Load Data}
 #| include: FALSE
 #| 
@@ -173,7 +171,27 @@ rm(cpal_old)
 
 rm(yearsNew)
 rm(yearsOld)
+
+# pasted text poverty metrics
+
+yearMax <- max(cpal_dallas$YEAR)
+dallasMax <- filter(cpal_dallas, YEAR == yearMax)
+dallasMin <- filter(cpal_dallas, YEAR == 2017)
+
+cbpMax <- scales::percent(dallasMax$cbp_1y, accuracy = 0.1)
+bp_u18Max <- dallasMax$bp_u18_1y
+bp_u18Min <- dallasMin$bp_u18_1y
+
+bp_u18Diff <- scales::number(bp_u18Max-bp_u18Min, big.mark = ",")
+
+bp_u18Chg <- scales::percent((bp_u18Max-bp_u18Min)/bp_u18Min, accuracy = 0.1)
+
+bp_u18Max <- scales::number(dallasMax$bp_u18_1y, big.mark = ",")
 ```
+
+# The Child Poverty Rate in the City of Dallas in `r yearMax` is `r cbpMax`
+
+According to estimates from the American Community Survey for `r yearMax`, there are now `r paste0(bp_u18Diff, " ", ifelse(bp_u18Diff > 0, "greater", "fewer"))` children in poverty within the City of Dallas than there were in 2017.
 
 ```{r, Child Poverty in Dallas}
 plotcbpLine <- cpal_dallas %>%
