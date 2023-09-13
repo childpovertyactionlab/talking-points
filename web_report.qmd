@@ -1,0 +1,208 @@
+---
+title: "Talking Points"
+title-block-banner: TRUE
+fig-dpi: 300
+fig-width: 7
+warning: FALSE
+error: TRUE
+echo: FALSE
+message: FALSE
+---
+
+# Main Header
+
+```{r, Load Data}
+#| include: FALSE
+#| 
+#####  Load Libraries #####
+library(tidycensus)
+library(tidyverse)
+library(rio)
+library(sf)
+#library(directlabels)
+library(cpaltemplates)
+#library(terra)
+#library(magick)
+
+#datalib <- "E:/CPAL Dropbox/" # Michael Desktop Directory
+datalib <- "C:/Users/Michael/CPAL Dropbox/" # Michael Laptop Directory
+
+##### Classify Objects and ACS Variables #####
+yearsOld <- lst(2010, 2011)
+yearsNew <- lst(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021)
+
+#acs_s <- load_variables(2018, "acs1/subject", cache = TRUE)
+#acs_b <- load_variables(2011, "acs5", cache = TRUE)
+#decennial <- load_variables(2020, "as", cache = TRUE)
+
+acs_varOld <- c(
+  tot_pop = "S1703_C01_001", #total population
+  pop_u18 = "S1703_C01_004", #population under 18
+  pop_bp = "S1701_C02_001", #population below poverty
+  bp_u18 = "S1701_C02_002", #population under 18 below poverty
+  mhi = "S0501_C01_101"#, #median household income
+#  rcb = "S0501_C01_137", #renter cost burden over 30%
+#  ocb = "S0501_C01_134", #owner cost burden over 30%
+#  rohh = "S0501_C01_135", #renter occupied households
+#  oohh = "S0501_C01_132" #owner occupied households
+)
+
+acs_varNew <- c(
+  tot_pop = "S1701_C01_001", #total population
+  pop_u18 = "S1701_C01_002", #population under 18
+  pop_bp = "S1701_C02_001", #population below poverty
+  bp_u18 = "S1701_C02_002", #population under 18 below poverty
+  mhi = "S0501_C01_101"#, #median household income
+#  rcb = "S0501_C01_137", #renter cost burden over 30%
+#  ocb = "S0501_C01_134", #owner cost burden over 30%
+#  rohh = "S0501_C01_135", #renter occupied households
+#  oohh = "S0501_C01_132" #owner occupied households
+)
+
+##### Pull Data from 2010 to 2020 #####
+cpal_old <- map(
+  yearsOld,
+  ~get_acs(
+    geography = "place", 
+    variables = acs_varOld,
+    year = .x,
+    survey = "acs1", 
+    output = "wide"),
+  ) %>%
+  map2(yearsOld, ~mutate(.x, YEAR = .y)) %>%
+  reduce(., rbind) %>%
+  mutate(NAME = str_replace(NAME, " city", ""))
+
+cpal_2020 <- get_acs(
+    geography = "place", 
+    variables = acs_varNew,
+    year = 2020, 
+    survey = "acs5", 
+    output = "wide") %>%
+  mutate(NAME = str_replace(NAME, " city", ""),
+         YEAR = 2020)
+
+cpal_multi <- map(
+  yearsNew,
+  ~get_acs(
+    geography = "place", 
+    variables = acs_varNew,
+    year = .x, 
+    survey = "acs1", 
+    output = "wide"),
+  ) %>%
+  map2(yearsNew, ~mutate(.x, YEAR = .y)) %>%
+  reduce(., rbind) %>%
+  mutate(NAME = str_replace(NAME, " city", ""))
+
+#calculate 3 year average using lag function and long format data
+yr3Avg <- function(x){
+  round((x+lag(x, n = 1)+lag(x, n = 3))/3, digits = 0)
+}
+
+#calculate year to year percent change using lag function and long format data
+yrPerCh <- function(x){
+  (x - lag(x, n = 1))/lag(x, n = 1)
+}
+
+##### Join into Complete Dataset #####
+cpal_comp <- rbind(cpal_old, cpal_multi) %>%
+  rbind(., cpal_2020) %>%
+  select(-tot_popM, -pop_u18M, -pop_bpM, -bp_u18M, -mhiM) %>%
+  rename(tot_pop_1y = tot_popE,
+         pop_u18_1y = pop_u18E,
+         pop_bp_1y = pop_bpE,
+         bp_u18_1y = bp_u18E,
+         mhi = mhiE) %>%
+  relocate(GEOID, NAME, YEAR, everything(.)) %>%
+  group_by(NAME) %>%
+  arrange(NAME, YEAR) %>%
+  mutate(tot_pop_3y = yr3Avg(x = tot_pop_1y),
+         pop_u18_3y = yr3Avg(x = pop_u18_1y),
+         pop_bp_3y = yr3Avg(x = pop_bp_1y),
+         bp_u18_3y = yr3Avg(x = bp_u18_1y),
+         
+         tot_pop_ch = yrPerCh(x = tot_pop_1y),
+         pop_u18_ch = yrPerCh(x = pop_u18_1y),
+         pop_bp_ch = yrPerCh(x = pop_bp_1y),
+         bp_u18_ch = yrPerCh(x = bp_u18_1y),
+         
+         cbp_1y = bp_u18_1y/pop_u18_1y,
+         cbp_3y = bp_u18_3y/pop_u18_3y,
+         bp_1y = pop_bp_1y/tot_pop_1y,
+         bp_3y = pop_bp_3y/tot_pop_3y
+         ) %>%
+  ungroup() %>%
+  mutate(highlight=ifelse(NAME == "Dallas, Texas", "DAL", "NONE"))
+
+#names(cpal_comp)
+
+##### Filter out multiple groups based on population size #####
+cpal_1mil <- cpal_comp %>%
+  group_by(NAME) %>%
+  filter(any(tot_pop_1y >= 1000000)) %>%
+  mutate(CODE = ifelse(NAME == "Chicago, Illinois", "CHI", 
+                       ifelse(NAME == "Dallas, Texas", "DAL", 
+                              ifelse(NAME == "Houston, Texas", "HOU", 
+                                     ifelse(NAME == "Los Angeles, California", "LA", 
+                                            ifelse(NAME == "New York, New York", "NYC", 
+                                                   ifelse(NAME == "Philadelphia, Pennsylvania", "PHI", 
+                                                          ifelse(NAME == "Phoenix, Arizona", "PHO", 
+                                                                 ifelse(NAME == "San Antonio, Texas", "SAN", 
+                                                                        ifelse(NAME == "San Diego, California", "SD", 
+                                                                               ifelse(NAME == "San Jose, California", "SJ", "ERROR")))))))))))
+
+# dallas, ft worth, houston, san antonio, austin, el paso
+cpal_texas <- cpal_comp %>%
+  filter(str_detect(NAME, ", Texas")) %>%
+  group_by(NAME) %>%
+  filter(any(tot_pop_1y >= 500000)) %>%
+  mutate(CODE = ifelse(NAME == "Dallas, Texas", "DAL", 
+                              ifelse(NAME == "Houston, Texas", "HOU", 
+                                     ifelse(NAME == "San Antonio, Texas", "SAN", 
+                                            ifelse(NAME == "El Paso, Texas", "ELP", 
+                                                   ifelse(NAME == "Austin, Texas", "AUS", 
+                                                          ifelse(NAME == "Fort Worth, Texas", "FTW", "ERROR")))))))
+
+cpal_dallas <- cpal_texas %>%
+  filter(CODE == "DAL")
+
+rm(cpal_2020)
+rm(cpal_multi)
+rm(cpal_old)
+
+rm(yearsNew)
+rm(yearsOld)
+```
+
+```{r, Child Poverty in Dallas}
+plotcbpLine <- cpal_dallas %>%
+  filter(YEAR >= 2017) %>%
+  ggplot(aes(x=YEAR, y=cbp_3y, color = CODE)) +
+  geom_line(linewidth = 2) +
+  geom_point(size = 4) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_size_manual(values=c(2, 1)) +
+  scale_y_continuous(limits = c(0, 0.40),
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_x_continuous(limits = c(2016.8, 2022.2),
+                     breaks = c(2017, 2018, 2019, 2020, 2021, 2022),
+                     expand = c(0.005, 0.005)
+  ) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Child Poverty Rate in Cities Over 1,000,000 Population",
+                     width = 75),
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          plotcbpLine, 
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 3, 30, 2))
+
+```
