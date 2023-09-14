@@ -62,7 +62,7 @@ ul.task-list li input[type="checkbox"] {
 
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -111,24 +111,17 @@ ul.task-list li input[type="checkbox"] {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#the-child-poverty-rate-in-the-city-of-dallas-in-2021-is-23.8" id="toc-the-child-poverty-rate-in-the-city-of-dallas-in-2021-is-23.8" class="nav-link active" data-scroll-target="#the-child-poverty-rate-in-the-city-of-dallas-in-2021-is-23.8">The Child Poverty Rate in the City of Dallas in 2021 is 23.8%</a></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<section id="the-child-poverty-rate-in-the-city-of-dallas-in-2021-is-23.8" class="level1">
-<h1>The Child Poverty Rate in the City of Dallas in 2021 is 23.8%</h1>
-<p>According to estimates from the American Community Survey for 2021, there are now -22,308 fewer children in poverty within the City of Dallas than there were in 2017.</p>
+<section id="the-child-poverty-rate-in-the-city-of-dallas-in-2022-is-25.9" class="level1">
+<h1>The Child Poverty Rate in the City of Dallas in 2022 is 25.9%</h1>
+<p>According to estimates from the American Community Survey for 2022, there are now -25,768 fewer children in poverty within the City of Dallas than there were in 2017.</p>
+<p>This rate is calculated from the 3 year average of 1-year American Community Survey Estimates.</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/Child Poverty in Dallas-1.png" class="img-fluid" width="2100"></p>
@@ -139,6 +132,9 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="index_files/figure-html/Poverty by Race/Ethnicity-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
+</section>
+<section id="compared-to-cities-with-a-population-over-1000000-the-city-dallas-has-the-fourth-highest-child-poverty-rate-in-2022" class="level1">
+<h1>Compared to cities with a population over 1,000,000, the City Dallas has the fourth highest Child Poverty Rate in 2022</h1>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/Child Poverty Rate in Cities Over 1,000,000 Population-1.png" class="img-fluid" width="2100"></p>
@@ -154,7 +150,28 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="index_files/figure-html/Poverty by Race/Ethnicity in Cities Over 1,000,000 Population-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
+<section id="compared-to-large-neighboring-texas-cities-the-city-dallas-has-the-fourth-highest-child-poverty-rate-in-2022-in-texas." class="level2">
+<h2 data-anchor-id="compared-to-large-neighboring-texas-cities-the-city-dallas-has-the-fourth-highest-child-poverty-rate-in-2022-in-texas.">Compared to large neighboring Texas cities, the City Dallas has the fourth highest Child Poverty Rate in 2022 in Texas.</h2>
 <div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 45
+# Groups:   NAME [6]
+  GEOID NAME   YEAR tot_pop_1y pop_u18_1y pop_u5_1y pop_bp_1y bp_u18_1y bp_u5_1y
+  &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+1 4835… Hous…  2022    2275013     519052    152908    471670    177119    55230
+2 4824… El P…  2022     670859     168319     43883    145773     52153    15460
+3 4865… San …  2022    1442553     345379     91483    269701     95777    24931
+4 4819… Dall…  2022    1287358     306159     91372    228878     79237    23412
+5 4827… Fort…  2022     942038     247404     63445    113005     39409    12327
+6 4805… Aust…  2022     957101     166718     49380    106566     23302     8277
+# ℹ 36 more variables: mhi &lt;dbl&gt;, his_popE &lt;dbl&gt;, blk_popE &lt;dbl&gt;,
+#   asn_popE &lt;dbl&gt;, wht_popE &lt;dbl&gt;, his_bpE &lt;dbl&gt;, blk_bpE &lt;dbl&gt;,
+#   asn_bpE &lt;dbl&gt;, wht_bpE &lt;dbl&gt;, tot_pop_3y &lt;dbl&gt;, pop_u18_3y &lt;dbl&gt;,
+#   pop_u5_3y &lt;dbl&gt;, pop_bp_3y &lt;dbl&gt;, bp_u18_3y &lt;dbl&gt;, bp_u5_3y &lt;dbl&gt;,
+#   tot_pop_ch &lt;dbl&gt;, pop_u18_ch &lt;dbl&gt;, pop_u5_ch &lt;dbl&gt;, pop_bp_ch &lt;dbl&gt;,
+#   bp_u18_ch &lt;dbl&gt;, bp_u5_ch &lt;dbl&gt;, c5bp_1y &lt;dbl&gt;, c5bp_3y &lt;dbl&gt;,
+#   cbp_1y &lt;dbl&gt;, cbp_3y &lt;dbl&gt;, bp_1y &lt;dbl&gt;, bp_3y &lt;dbl&gt;, oth_bpE &lt;dbl&gt;, …</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/Child Poverty Rate in Texas Cities-1.png" class="img-fluid" width="2100"></p>
 </div>
@@ -171,6 +188,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

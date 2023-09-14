@@ -5,7 +5,7 @@ project:
 format:
   html:
     theme: www/web_report.scss
-    toc: true
+    toc: false
     toc-depth: 4
     anchor-sections: false
 website:
