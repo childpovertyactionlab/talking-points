@@ -193,6 +193,14 @@ cpal_1milCh <- cpal_1mil %>%
          NEW = 6) %>%
   mutate(cbpChange = (NEW-OLD)/OLD)
 
+cpal_1mil1YrCh <- cpal_1mil %>%
+  filter(YEAR == 2021 | YEAR == max(cpal_comp$YEAR)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y) %>%
+  pivot_wider(names_from = YEAR, values_from = bp_u18_3y) %>%
+  rename(OLD = 5,
+         NEW = 6) %>%
+  mutate(cbpChange = (NEW-OLD)/OLD)
+
 # dallas, ft worth, houston, san antonio, austin, el paso
 cpal_texas <- cpal_comp %>%
   filter(str_detect(NAME, ", Texas")) %>%
@@ -213,6 +221,13 @@ cpal_texasCh <- cpal_texas %>%
          NEW = 6) %>%
   mutate(cbpChange = (NEW-OLD)/OLD)
 
+cpal_texas1YrCh <- cpal_texas %>%
+  filter(YEAR == 2021 | YEAR == max(cpal_comp$YEAR)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y) %>%
+  pivot_wider(names_from = YEAR, values_from = bp_u18_3y) %>%
+  rename(OLD = 5,
+         NEW = 6) %>%
+  mutate(cbpChange = (NEW-OLD)/OLD)
 
 cpal_dallas <- cpal_texas %>%
   filter(CODE == "DAL")
@@ -251,13 +266,17 @@ bp_u18Max <- scales::number(dallasMax$bp_u18_3y, big.mark = ",")
 
 According to estimates from the American Community Survey for `r yearMax`, there are now `r paste0(bp_u18Diff, " ", ifelse(bp_u18Diff > 0, "greater", "fewer"))` children in poverty within the City of Dallas than there were in 2017.
 
-This rate is calculated from the 3 year average of 1-year American Community Survey Estimates.
+This poverty rate for all data included in this report is calculated from the 3 year average of 1-year American Community Survey Estimates unless specified as otherwise.
 
 ```{r, Child Poverty in Dallas}
 plotcbpLine <- cpal_dallas %>%
   filter(YEAR >= 2017) %>%
   ggplot(aes(x=YEAR, y=cbp_3y, color = CODE)) +
   geom_line(linewidth = 1.5) +
+  geom_text(aes(label = paste0(round(cbp_3y*100, digits = 2), "%")),
+            position = position_stack(vjust = 1.1),
+            color = palette_cpal_main[3],
+            fontface = "bold") +
   geom_point(size = 4) +
   scale_color_manual(values = palette_cpal_main) +
   scale_size_manual(values=c(2, 1)) +
@@ -355,6 +374,37 @@ cpal_plot(zeroGrob(),
           cpal_title(string = "Child Poverty Rate in Cities Over 1,000,000 Population",
                      width = 75),
           plot1MilLine, 
+          cpal_source(text = "U.S. Census Bureau. American Community Survey Table S1702, 1-year estimates. (2017-2022)"),
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2, 2))
+
+```
+
+# Between 2021 and 2022 the Child Poverty Rate in all large cities continues to decrease relative to prior years.
+```{r, One Year Child Poverty Change in Cities Over 1,000,000 Population}
+plot1MilBar <- cpal_1mil1YrCh %>%
+  ggplot(aes(x=cbpChange, y=reorder(CODE, -cbpChange), fill = highlight)) +
+  geom_bar(stat = "identity", width = 0.8) +
+  geom_text(aes(label = paste0(round(cbpChange*100, digits = 0), "%")),
+            x = -0.007,
+            color = "white",
+            fontface = "bold") +
+  scale_fill_manual(values = palette_cpal_main) +
+  scale_x_continuous(limits = c(-0.2, 0),
+                     breaks = c(-0.2, -0.1, 0),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = paste0("Percent Change in Child Poverty in Cities Over 1,000,000 Population Between 2021 and ", max(cpal_1mil$YEAR)),
+                     width = 75),
+          plot1MilBar, 
           cpal_source(text = "U.S. Census Bureau. American Community Survey Table S1702, 1-year estimates. (2017-2022)"),
           cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to pandemic collection issues."),
           cpal_logo_text(), 
