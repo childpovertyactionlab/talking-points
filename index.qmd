@@ -303,16 +303,18 @@ plotRaceLine <- cpal_dallas %>%
   ) +
   labs(x = "",
        y = "") +
-  theme_cpal_print()
+  theme_cpal_print() +
+  guides(color = guide_legend(nrow = 2))
 
 cpal_plot(zeroGrob(),
           cpal_title(string = "Poverty Rate by Race/Ethnicity in the City of Dallas",
                      width = 75),
           plotRaceLine, 
           cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_source(text = "ACS SURVEY"),
           cpal_logo_text(), 
           ncol = 1,
-          heights = c(1, 3, 30, 3, 2))
+          heights = c(1, 3, 30, 3, 2, 2))
 
 ```
 
