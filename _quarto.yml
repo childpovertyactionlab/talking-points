@@ -5,8 +5,8 @@ project:
 format:
   html:
     theme: www/web_report.scss
-    toc: false
-    toc-depth: 4
+    toc: true
+    toc-depth: 2
     anchor-sections: false
 website:
   favicon: www/images/CPAL_favicon.ico
