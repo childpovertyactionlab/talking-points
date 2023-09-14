@@ -363,6 +363,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
+# Since 2017 the City of Dallas has had the fourth largest drop in Child Poverty compared to its peer metropolitan cities.
 ```{r, Child Poverty Change in Cities Over 1,000,000 Population}
 plot1MilBar <- cpal_1milCh %>%
   ggplot(aes(x=cbpChange, y=reorder(CODE, -cbpChange), fill = highlight)) +
@@ -431,10 +432,6 @@ cpal_plot(zeroGrob(),
 
 ## Compared to large neighboring Texas cities, the City Dallas has the fourth highest Child Poverty Rate in `r yearMax` in Texas.
 ```{r, Child Poverty Rate in Texas Cities}
-cpal_texas %>%
-  filter(YEAR == 2022) %>%
-  arrange(desc(cbp_3y))
-
 plot1MilLine <- cpal_texas %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
   filter(YEAR >= 2017) %>%
@@ -469,6 +466,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
+# Since 2017 the City of Dallas has had the second largest drop in Child Poverty compared to its peer Texas cities.
 ```{r, Child Poverty Change in Texas Cities}
 plotTexasBar <- cpal_texasCh %>%
   ggplot(aes(x=cbpChange, y=reorder(CODE, -cbpChange), fill = highlight)) +
