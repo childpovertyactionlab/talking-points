@@ -377,6 +377,40 @@ cpal_plot(zeroGrob(),
 
 ```
 
+```{r, Poverty by Race/Ethnicity in Cities Over 1,000,000 Population}
+plotRace1Mil <- cpal_1mil %>%
+  select(GEOID, NAME, CODE, YEAR, bp_1y, his_bp_per:wht_bp_per) %>%
+  pivot_longer(cols = bp_1y:wht_bp_per, names_to = "race", values_to = "percent") %>%
+  mutate(race = ifelse(race == "his_bp_per", "Hispanic/Latino",
+                       ifelse(race == "blk_bp_per", "Black or African American",
+                              ifelse(race == "asn_bp_per", "Asian or Pacific Islander",
+                                     ifelse(race == "wht_bp_per", "White Non-Hispanic", 
+                                            ifelse(race == "bp_1y", "Overall Population", "ERROR"))))),
+         race = factor(race, levels = c("Overall Population", "White Non-Hispanic", "Hispanic/Latino", "Black or African American", "Asian or Pacific Islander", "ERROR"))) %>%
+  filter(YEAR >= max(cpal_1mil$YEAR)) %>%
+  ggplot(aes(x=percent, y=CODE, color = race)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_x_continuous(limits = c(0, 0.32),
+                     breaks = c(0, 0.1, 0.2, 0.3),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print()
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Poverty Rate by Race/Ethnicity in Cities Over 1,000,000 Population",
+                     width = 75),
+          plotRace1Mil, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_source(text = "ACS SURVEY"),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2, 2))
+
+```
+
 ```{r, Child Poverty Rate in Texas Cities}
 plot1MilLine <- cpal_texas %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
@@ -433,5 +467,39 @@ cpal_plot(zeroGrob(),
           cpal_logo_text(), 
           ncol = 1,
           heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Poverty by Race/Ethnicity in Texas Cities}
+plotRaceTexas <- cpal_texas %>%
+  select(GEOID, NAME, CODE, YEAR, bp_1y, his_bp_per:wht_bp_per) %>%
+  pivot_longer(cols = bp_1y:wht_bp_per, names_to = "race", values_to = "percent") %>%
+  mutate(race = ifelse(race == "his_bp_per", "Hispanic/Latino",
+                       ifelse(race == "blk_bp_per", "Black or African American",
+                              ifelse(race == "asn_bp_per", "Asian or Pacific Islander",
+                                     ifelse(race == "wht_bp_per", "White Non-Hispanic", 
+                                            ifelse(race == "bp_1y", "Overall Population", "ERROR"))))),
+         race = factor(race, levels = c("Overall Population", "White Non-Hispanic", "Hispanic/Latino", "Black or African American", "Asian or Pacific Islander", "ERROR"))) %>%
+  filter(YEAR >= max(cpal_1mil$YEAR)) %>%
+  ggplot(aes(x=percent, y=CODE, color = race)) +
+  geom_point(size = 4) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_x_continuous(limits = c(0, 0.32),
+                     breaks = c(0, 0.1, 0.2, 0.3),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print()
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Poverty Rate by Race/Ethnicity in Texas Cities",
+                     width = 75),
+          plotRaceTexas, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_source(text = "ACS SURVEY"),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2, 2))
 
 ```
