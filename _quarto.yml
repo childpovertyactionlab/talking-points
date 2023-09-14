@@ -22,7 +22,7 @@ website:
       right:
         - icon: house-door-fill
           text: "Home"
-          href: web_report.html
+          href: index.html
         - icon: github
           text: "Github"
           href: "https://github.com/childpovertyactionlab/"

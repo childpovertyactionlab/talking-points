@@ -1,0 +1,435 @@
+---
+title: "Talking Points"
+title-block-banner: TRUE
+fig-dpi: 300
+fig-width: 7
+warning: FALSE
+error: TRUE
+echo: FALSE
+message: FALSE
+---
+
+```{r, Load Data}
+#| include: FALSE
+#| 
+#####  Load Libraries #####
+library(tidycensus)
+library(tidyverse)
+library(rio)
+library(sf)
+#library(directlabels)
+library(cpaltemplates)
+#library(terra)
+#library(magick)
+library(plotly)
+
+#datalib <- "E:/CPAL Dropbox/" # Michael Desktop Directory
+datalib <- "C:/Users/Michael/CPAL Dropbox/" # Michael Laptop Directory
+
+##### Classify Objects and ACS Variables #####
+yearsOld <- lst(2010, 2011)
+yearsNew <- lst(2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021)
+
+acs_s <- load_variables(2018, "acs1/subject", cache = TRUE)
+#acs_b <- load_variables(2011, "acs5", cache = TRUE)
+#decennial <- load_variables(2020, "as", cache = TRUE)
+
+acs_varOld <- c(
+  tot_pop = "S1701_C01_001", #total population
+  pop_u18 = "S1701_C01_002", #population under 18
+  pop_bp = "S1701_C02_001", #population below poverty
+  bp_u18 = "S1701_C02_002", #population under 18 below poverty
+  
+  mhi = "S0501_C01_101", #median household income
+  
+  his_pop = "S1701_C01_016", #hispanic non-white population
+  blk_pop = "S1701_C01_010", #black population population
+  asn_pop = "S1701_C01_012", #asian population population
+  wht_pop = "S1701_C01_017", #white non-hispanic popuation
+  
+  his_bp = "S1701_C02_016", #hispanic non-white population below poverty
+  blk_bp = "S1701_C02_010", #black population population below poverty
+  asn_bp = "S1701_C02_012", #asian population population below poverty
+  wht_bp = "S1701_C02_017" #white non-hispanic popuation below poverty
+)
+
+acs_varNew <- c(
+  tot_pop = "S1701_C01_001", #total population
+  pop_u18 = "S1701_C01_002", #population under 18
+  pop_u5 = "S1701_C01_003", #population under 5
+  pop_bp = "S1701_C02_001", #population below poverty
+  bp_u18 = "S1701_C02_002", #population under 18 below poverty
+  bp_u5 = "S1701_C02_003", #population under 5 below poverty
+  
+  mhi = "S0501_C01_101", #median household income
+  
+  his_pop = "S1701_C01_020", #hispanic non-white population
+  blk_pop = "S1701_C01_014", #black population population
+  asn_pop = "S1701_C01_016", #asian population population
+  wht_pop = "S1701_C01_021", #white non-hispanic popuation
+  
+  his_bp = "S1701_C02_020", #hispanic non-white population below poverty
+  blk_bp = "S1701_C02_014", #black population population below poverty
+  asn_bp = "S1701_C02_016", #asian population population below poverty
+  wht_bp = "S1701_C02_021" #white non-hispanic popuation below poverty
+)
+
+##### Pull Data from 2010 to 2020 #####
+cpal_old <- map(
+  yearsOld,
+  ~get_acs(
+    geography = "place", 
+    variables = acs_varOld,
+    year = .x,
+    survey = "acs1", 
+    output = "wide"),
+  ) %>%
+  map2(yearsOld, ~mutate(.x, YEAR = .y)) %>%
+  reduce(., rbind) %>%
+  mutate(NAME = str_replace(NAME, " city", ""))
+
+cpal_2020 <- get_acs(
+    geography = "place", 
+    variables = acs_varNew,
+    year = 2020, 
+    survey = "acs5", 
+    output = "wide") %>%
+  mutate(NAME = str_replace(NAME, " city", ""),
+         YEAR = 2020)
+
+cpal_multi <- map(
+  yearsNew,
+  ~get_acs(
+    geography = "place", 
+    variables = acs_varNew,
+    year = .x, 
+    survey = "acs1", 
+    output = "wide"),
+  ) %>%
+  map2(yearsNew, ~mutate(.x, YEAR = .y)) %>%
+  reduce(., rbind) %>%
+  mutate(NAME = str_replace(NAME, " city", ""))
+
+#calculate 3 year average using lag function and long format data
+yr3Avg <- function(x){
+  round((x+lag(x, n = 1)+lag(x, n = 3))/3, digits = 0)
+}
+
+#calculate year to year percent change using lag function and long format data
+yrPerCh <- function(x){
+  (x - lag(x, n = 1))/lag(x, n = 1)
+}
+
+##### Join into Complete Dataset #####
+cpal_comp <- full_join(cpal_multi, cpal_2020) %>%
+  full_join(., cpal_old) %>%
+  rename(tot_pop_1y = tot_popE,
+         pop_u18_1y = pop_u18E,
+         pop_u5_1y = pop_u5E,
+         pop_bp_1y = pop_bpE,
+         bp_u18_1y = bp_u18E,
+         bp_u5_1y = bp_u5E,
+         mhi = mhiE) %>%
+  select(-ends_with("M")) %>%
+  relocate(GEOID, NAME, YEAR, everything(.)) %>%
+  group_by(NAME) %>%
+  arrange(NAME, YEAR) %>%
+  mutate(tot_pop_3y = yr3Avg(x = tot_pop_1y),
+         pop_u18_3y = yr3Avg(x = pop_u18_1y),
+         pop_u5_3y = yr3Avg(x = pop_u5_1y),
+         pop_bp_3y = yr3Avg(x = pop_bp_1y),
+         bp_u18_3y = yr3Avg(x = bp_u18_1y),
+         bp_u5_3y = yr3Avg(x = bp_u5_1y),
+         
+         tot_pop_ch = yrPerCh(x = tot_pop_1y),
+         pop_u18_ch = yrPerCh(x = pop_u18_1y),
+         pop_u5_ch = yrPerCh(x = pop_u5_1y),
+         pop_bp_ch = yrPerCh(x = pop_bp_1y),
+         bp_u18_ch = yrPerCh(x = bp_u18_1y),
+         bp_u5_ch = yrPerCh(x = bp_u5_1y),
+         
+         c5bp_1y = bp_u5_1y/pop_u5_1y,
+         c5bp_3y = bp_u5_3y/pop_u5_3y,
+         cbp_1y = bp_u18_1y/pop_u18_1y,
+         cbp_3y = bp_u18_3y/pop_u18_3y,
+         bp_1y = pop_bp_1y/tot_pop_1y,
+         bp_3y = pop_bp_3y/tot_pop_3y,
+         
+         oth_bpE = pop_bp_1y-(his_bpE+asn_bpE+wht_bpE+blk_bpE),
+         oth_popE = tot_pop_1y-(his_popE+asn_popE+wht_popE+blk_popE),
+         
+         oth_bp_per = oth_bpE/oth_popE,
+         his_bp_per = his_bpE/his_popE,
+         asn_bp_per = asn_bpE/asn_popE,
+         blk_bp_per = blk_bpE/blk_popE,
+         wht_bp_per = wht_bpE/wht_popE
+         ) %>%
+  ungroup() %>%
+  mutate(highlight=ifelse(NAME == "Dallas, Texas", "DAL", "NONE"),
+         highlight = factor(highlight, levels = c("NONE", "DAL")))
+
+#names(cpal_comp)
+
+##### Filter out multiple groups based on population size #####
+cpal_1mil <- cpal_comp %>%
+  group_by(NAME) %>%
+  filter(any(tot_pop_1y >= 1000000)) %>%
+  mutate(CODE = ifelse(NAME == "Chicago, Illinois", "CHI", 
+                       ifelse(NAME == "Dallas, Texas", "DAL", 
+                              ifelse(NAME == "Houston, Texas", "HOU", 
+                                     ifelse(NAME == "Los Angeles, California", "LA", 
+                                            ifelse(NAME == "New York, New York", "NYC", 
+                                                   ifelse(NAME == "Philadelphia, Pennsylvania", "PHI", 
+                                                          ifelse(NAME == "Phoenix, Arizona", "PHO", 
+                                                                 ifelse(NAME == "San Antonio, Texas", "SAN", 
+                                                                        ifelse(NAME == "San Diego, California", "SD", 
+                                                                               ifelse(NAME == "San Jose, California", "SJ", "ERROR")))))))))))
+
+cpal_1milCh <- cpal_1mil %>%
+  filter(YEAR == 2017 | YEAR == max(cpal_comp$YEAR)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y) %>%
+  pivot_wider(names_from = YEAR, values_from = bp_u18_3y) %>%
+  rename(OLD = 5,
+         NEW = 6) %>%
+  mutate(cbpChange = (NEW-OLD)/OLD)
+
+# dallas, ft worth, houston, san antonio, austin, el paso
+cpal_texas <- cpal_comp %>%
+  filter(str_detect(NAME, ", Texas")) %>%
+  group_by(NAME) %>%
+  filter(any(tot_pop_1y >= 500000)) %>%
+  mutate(CODE = ifelse(NAME == "Dallas, Texas", "DAL", 
+                              ifelse(NAME == "Houston, Texas", "HOU", 
+                                     ifelse(NAME == "San Antonio, Texas", "SAN", 
+                                            ifelse(NAME == "El Paso, Texas", "ELP", 
+                                                   ifelse(NAME == "Austin, Texas", "AUS", 
+                                                          ifelse(NAME == "Fort Worth, Texas", "FTW", "ERROR")))))))
+
+cpal_texasCh <- cpal_texas %>%
+  filter(YEAR == 2017 | YEAR == max(cpal_comp$YEAR)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y) %>%
+  pivot_wider(names_from = YEAR, values_from = bp_u18_3y) %>%
+  rename(OLD = 5,
+         NEW = 6) %>%
+  mutate(cbpChange = (NEW-OLD)/OLD)
+
+
+cpal_dallas <- cpal_texas %>%
+  filter(CODE == "DAL")
+
+rm(cpal_2020)
+rm(cpal_multi)
+rm(cpal_old)
+
+rm(yearsNew)
+rm(yearsOld)
+
+# pasted text poverty metrics
+
+yearMax <- max(cpal_dallas$YEAR)
+dallasMax <- filter(cpal_dallas, YEAR == yearMax)
+dallasMin <- filter(cpal_dallas, YEAR == 2017)
+
+cbpMax <- scales::percent(dallasMax$cbp_1y, accuracy = 0.1)
+bp_u18Max <- dallasMax$bp_u18_1y
+bp_u18Min <- dallasMin$bp_u18_1y
+
+bp_u18Diff <- scales::number(bp_u18Max-bp_u18Min, big.mark = ",")
+
+bp_u18Chg <- scales::percent((bp_u18Max-bp_u18Min)/bp_u18Min, accuracy = 0.1)
+
+bp_u18Max <- scales::number(dallasMax$bp_u18_1y, big.mark = ",")
+```
+
+# The Child Poverty Rate in the City of Dallas in `r yearMax` is `r cbpMax`
+
+According to estimates from the American Community Survey for `r yearMax`, there are now `r paste0(bp_u18Diff, " ", ifelse(bp_u18Diff > 0, "greater", "fewer"))` children in poverty within the City of Dallas than there were in 2017.
+
+```{r, Child Poverty in Dallas}
+plotcbpLine <- cpal_dallas %>%
+  filter(YEAR >= 2017) %>%
+  ggplot(aes(x=YEAR, y=cbp_3y, color = CODE)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(size = 4) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_size_manual(values=c(2, 1)) +
+  scale_y_continuous(limits = c(0, 0.40),
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_x_continuous(limits = c(2016.8, 2022.2),
+                     breaks = c(2017, 2018, 2019, 2020, 2021, 2022),
+                     expand = c(0.005, 0.005)
+  ) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Child Poverty Rate in Cities Over 1,000,000 Population",
+                     width = 75),
+          plotcbpLine, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Poverty by Race/Ethnicity}
+plotRaceLine <- cpal_dallas %>%
+  select(GEOID, NAME, YEAR, bp_1y, his_bp_per:wht_bp_per) %>%
+  pivot_longer(cols = bp_1y:wht_bp_per, names_to = "race", values_to = "percent") %>%
+  mutate(race = ifelse(race == "his_bp_per", "Hispanic/Latino",
+                       ifelse(race == "blk_bp_per", "Black or African American",
+                              ifelse(race == "asn_bp_per", "Asian or Pacific Islander",
+                                     ifelse(race == "wht_bp_per", "White Non-Hispanic", 
+                                            ifelse(race == "bp_1y", "Overall Population", "ERROR"))))),
+         race = factor(race, levels = c("Overall Population", "White Non-Hispanic", "Hispanic/Latino", "Black or African American", "Asian or Pacific Islander", "ERROR"))) %>%
+  filter(YEAR >= 2017) %>%
+  ggplot(aes(x=YEAR, y=percent, color = race, group = race)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(size = 4) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_size_manual(values=c(2, 1)) +
+  scale_y_continuous(limits = c(0, 0.3),
+                     breaks = c(0, 0.1, 0.2, 0.3),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_x_continuous(limits = c(2016.8, 2022.2),
+                     breaks = c(2017, 2018, 2019, 2020, 2021, 2022),
+                     expand = c(0.005, 0.005)
+  ) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print()
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Poverty Rate by Race/Ethnicity in the City of Dallas",
+                     width = 75),
+          plotRaceLine, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Child Poverty Rate in Cities Over 1,000,000 Population}
+plot1MilLine <- cpal_1mil %>%
+  mutate(CODE = factor(CODE, levels = c("DAL", "NYC", "LA", "CHI", "HOU", "PHO", "SAN", "PHI", "SD", "SJ"))) %>%
+  filter(YEAR >= 2017) %>%
+  ggplot(aes(x=YEAR, y=cbp_3y, group = CODE, color = highlight)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(size = 3) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_y_continuous(limits = c(0, 0.45),
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_x_continuous(limits = c(2016.8, 2022.2),
+                     breaks = c(2017, 2018, 2019, 2020, 2021, 2022),
+                     expand = c(0.005, 0.005)
+  ) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  facet_wrap(~CODE, ncol = 5) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=1)) +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Child Poverty Rate in Cities Over 1,000,000 Population",
+                     width = 75),
+          plot1MilLine, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Child Poverty Change in Cities Over 1,000,000 Population}
+plot1MilBar <- cpal_1milCh %>%
+  ggplot(aes(x=cbpChange, y=reorder(CODE, -cbpChange), fill = highlight)) +
+  geom_bar(stat = "identity", width = 0.8) +
+  scale_fill_manual(values = palette_cpal_main) +
+  scale_x_continuous(limits = c(-0.25, 0),
+#                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = paste0("Percent Change in Child Poverty in Cities Over 1,000,000 Population Between 2017 and ", max(cpal_1mil$YEAR)),
+                     width = 75),
+          plot1MilBar, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Child Poverty Rate in Texas Cities}
+plot1MilLine <- cpal_texas %>%
+  mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
+  filter(YEAR >= 2017) %>%
+  ggplot(aes(x=YEAR, y=cbp_3y, group = CODE, color = highlight)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(size = 3) +
+  scale_color_manual(values = palette_cpal_main) +
+  scale_y_continuous(limits = c(0, 0.45),
+                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  scale_x_continuous(limits = c(2016.8, 2022.2),
+                     breaks = c(2017, 2018, 2019, 2020, 2021, 2022),
+                     expand = c(0.005, 0.005)
+  ) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  facet_wrap(~CODE, ncol = 3) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.9, hjust=1)) +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = "Child Poverty Rate in Texas Cities",
+                     width = 75),
+          plot1MilLine, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
+
+```{r, Child Poverty Change in Texas Cities}
+plotTexasBar <- cpal_texasCh %>%
+  ggplot(aes(x=cbpChange, y=reorder(CODE, -cbpChange), fill = highlight)) +
+  geom_bar(stat = "identity", width = 0.8) +
+  scale_fill_manual(values = palette_cpal_main) +
+  scale_x_continuous(limits = c(-0.25, 0),
+#                     breaks = c(0, 0.1, 0.2, 0.3, 0.4),
+                     labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = paste0("Percent Change in Child Poverty in Texas Cities Between 2017 and ", max(cpal_1mil$YEAR)),
+                     width = 75),
+          plotTexasBar, 
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to Pandemic collection issues."),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 3, 2))
+
+```
