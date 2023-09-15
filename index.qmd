@@ -1,5 +1,5 @@
 ---
-title: "Talking Points"
+title: "Child Poverty Talking Points"
 title-block-banner: TRUE
 fig-dpi: 300
 fig-width: 6
@@ -508,8 +508,8 @@ plot1MilBar <- cpal_1milCh %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "NYC", "LA", "CHI", "HOU", "PHO", "SAN", "PHI", "SD", "SJ"))) %>%
   ggplot(aes(x=value, y=CODE, fill = highlight)) +
   geom_bar(stat = "identity", width = 0.8) +
-  geom_text(aes(label = paste0(round(value*100, digits = 0), "%"),
-                x = 0.007),
+  geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
+                x = 0.008),
                 color = palette_cpal_main[3],
                 fontface = "bold") +
   facet_wrap(~name) +
@@ -625,8 +625,8 @@ plotTexasBar <- cpal_texasCh %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
   ggplot(aes(x=value, y=CODE, fill = highlight)) +
   geom_bar(stat = "identity", width = 0.8) +
-  geom_text(aes(label = paste0(round(value*100, digits = 0), "%"),
-                x = 0.008),
+  geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
+                x = 0.029),
                 color = palette_cpal_main[3],
                 fontface = "bold") +
   facet_wrap(~name) +
