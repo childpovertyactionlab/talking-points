@@ -189,27 +189,27 @@ cpal_1mil <- cpal_comp %>%
 
 cpal_1milCh <- cpal_1mil %>%
   filter(YEAR == 2017 | YEAR == max(cpal_comp$YEAR)) %>%
-  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y, bp_u18_1y) %>%
-  pivot_wider(names_from = YEAR, values_from = c(bp_u18_3y, bp_u18_1y)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, cbp_3y, cbp_1y) %>%
+  pivot_wider(names_from = YEAR, values_from = c(cbp_3y, cbp_1y)) %>%
   rename(OLD3y = 5,
          NEW3y = 6,
          OLD1y = 7,
          NEW1y = 8,
          ) %>%
-  mutate(cbpChange1y = (NEW1y-OLD1y)/OLD1y,
-         cbpChange3y = (NEW3y-OLD3y)/OLD3y)
+  mutate(cbpChange1y = (NEW1y-OLD1y),
+         cbpChange3y = (NEW3y-OLD3y))
 
 cpal_1mil1YrCh <- cpal_1mil %>%
   filter(YEAR == 2021 | YEAR == max(cpal_comp$YEAR)) %>%
-  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y, bp_u18_1y) %>%
-  pivot_wider(names_from = YEAR, values_from = c(bp_u18_3y, bp_u18_1y)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, cbp_3y, cbp_1y) %>%
+  pivot_wider(names_from = YEAR, values_from = c(cbp_3y, cbp_1y)) %>%
   rename(OLD3y = 5,
          NEW3y = 6,
          OLD1y = 7,
          NEW1y = 8,
          ) %>%
-  mutate(cbpChange1y = (NEW1y-OLD1y)/OLD1y,
-         cbpChange3y = (NEW3y-OLD3y)/OLD3y)
+  mutate(cbpChange1y = (NEW1y-OLD1y),
+         cbpChange3y = (NEW3y-OLD3y))
 
 # dallas, ft worth, houston, san antonio, austin, el paso
 cpal_texas <- cpal_comp %>%
@@ -226,27 +226,27 @@ cpal_texas <- cpal_comp %>%
 
 cpal_texasCh <- cpal_texas %>%
   filter(YEAR == 2017 | YEAR == max(cpal_comp$YEAR)) %>%
-  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y, bp_u18_1y) %>%
-  pivot_wider(names_from = YEAR, values_from = c(bp_u18_3y, bp_u18_1y)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, cbp_3y, cbp_1y) %>%
+  pivot_wider(names_from = YEAR, values_from = c(cbp_3y, cbp_1y)) %>%
   rename(OLD3y = 5,
          NEW3y = 6,
          OLD1y = 7,
          NEW1y = 8,
          ) %>%
-  mutate(cbpChange1y = (NEW1y-OLD1y)/OLD1y,
-         cbpChange3y = (NEW3y-OLD3y)/OLD3y)
+  mutate(cbpChange1y = (NEW1y-OLD1y),
+         cbpChange3y = (NEW3y-OLD3y))
 
 cpal_texas1YrCh <- cpal_texas %>%
   filter(YEAR == 2021 | YEAR == max(cpal_comp$YEAR)) %>%
-  select(GEOID, NAME, CODE, YEAR, highlight, bp_u18_3y, bp_u18_1y) %>%
-  pivot_wider(names_from = YEAR, values_from = c(bp_u18_3y, bp_u18_1y)) %>%
+  select(GEOID, NAME, CODE, YEAR, highlight, cbp_3y, cbp_1y) %>%
+  pivot_wider(names_from = YEAR, values_from = c(cbp_3y, cbp_1y)) %>%
   rename(OLD3y = 5,
          NEW3y = 6,
          OLD1y = 7,
          NEW1y = 8,
          ) %>%
-  mutate(cbpChange1y = (NEW1y-OLD1y)/OLD1y,
-         cbpChange3y = (NEW3y-OLD3y)/OLD3y)
+  mutate(cbpChange1y = (NEW1y-OLD1y),
+         cbpChange3y = (NEW3y-OLD3y))
 
 cpal_dallas <- cpal_texas %>%
   filter(CODE == "DAL")
@@ -294,7 +294,7 @@ plotcbpLine <- cpal_dallas %>%
   filter(YEAR >= 2017) %>%
   select(NAME, YEAR, CODE, cbp_3y, cbp_1y) %>%
   pivot_longer(cols = c(cbp_3y, cbp_1y)) %>%
-  mutate(name = ifelse(name == "cbp_3y", "CPAL 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(name = ifelse(name == "cbp_3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
 ggplot(aes(x=YEAR, y=value, color = name)) +
   geom_line(linewidth = 1, alpha = 0.8) +
 #  geom_text(aes(label = paste0(round(value*100, digits = 1), "%")),
@@ -341,7 +341,7 @@ cpal_dallas %>%
          childpov3y = paste0(scales::number(bp_u18_3y, big.mark = ","), " (", scales::percent(cbp_3y, accuracy = 0.1), ")")) %>%
   select(-NAME, -CODE, -(cbp_3y:bp_u18_3y)) %>%
   pivot_longer(cols = c(childpov3y, childpov1y)) %>%
-  mutate(name = ifelse(name == "childpov3y", "CPAL 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(name = ifelse(name == "childpov3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
   pivot_wider(names_from = YEAR, values_from = value) %>%
   rename('Data Source' = name) %>%
   datatable(options = list(paging = FALSE,
@@ -399,7 +399,7 @@ cpal_plot(zeroGrob(),
 
 Compared to cities with a population over 1,000,000, the City Dallas has the fourth highest Child Poverty Rate in `r yearMax`
 
-```{r, Child Poverty Rate in Cities Over 1,000,000 Population}
+```{r, Child Poverty Rate in Peer Metropolitan Cities}
 plot1MilLine <- cpal_1mil %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "NYC", "LA", "CHI", "HOU", "PHO", "SAN", "PHI", "SD", "SJ"))) %>%
   filter(YEAR >= 2017) %>%
@@ -423,7 +423,7 @@ plot1MilLine <- cpal_1mil %>%
   theme(legend.position = "NONE")
 
 cpal_plot(zeroGrob(),
-          cpal_title(string = "Child Poverty Rate in Cities Over 1,000,000 Population",
+          cpal_title(string = "Child Poverty Rate in Metropolitan Cities",
                      width = 75),
           plot1MilLine, 
           cpal_source(text = "U.S. Census Bureau. American Community Survey Table S1702, 1-year estimates. (2017-2022)"),
@@ -443,12 +443,12 @@ plot1MilBar <- cpal_1mil1YrCh %>%
   ungroup() %>%
   select(CODE, highlight, cbpChange1y, cbpChange3y) %>%
   pivot_longer(cols = c(cbpChange3y, cbpChange1y)) %>%
-  mutate(name = ifelse(name == "cbpChange3y", "CPAL 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(name = ifelse(name == "cbpChange3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "NYC", "LA", "CHI", "HOU", "PHO", "SAN", "PHI", "SD", "SJ"))) %>%
   ggplot(aes(x=value, y=CODE, fill = highlight)) +
   geom_bar(stat = "identity", width = 0.8) +
-  geom_text(aes(label = paste0(round(value*100, digits = 0), "%"),
-                x = 0.05),
+  geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
+                x = 0.035),
                 color = palette_cpal_main[3],
                 fontface = "bold") +
   facet_wrap(~name) +
@@ -474,8 +474,8 @@ cpal_plot(zeroGrob(),
 
 ```
 
-### Child Poverty Metrics Cities Over 1,000,000 Table
-```{r, Child Poverty Table Cities Over 1,000,000 Million}
+### Child Poverty Metrics in Peer Metropolitan Cities Table
+```{r, Child Poverty Table Peer Metropoloitan Cities}
 cpal_1mil %>%
   ungroup(.) %>%
   filter(YEAR %in% c(2022)) %>%
@@ -486,7 +486,7 @@ cpal_1mil %>%
   pivot_longer(cols = c(childpov3y, childpov1y)) %>%
   pivot_wider(names_from = name, values_from = value) %>%
   rename('City' = CODE,
-         'CPAL 3-Year Average' = childpov3y,
+         'ACS 3-Year Average' = childpov3y,
          'ACS 1-Year Survey' = childpov1y) %>%
   datatable(options = list(paging = FALSE,
                            searching = FALSE,
@@ -499,17 +499,17 @@ cpal_1mil %>%
 
 Since 2017 the City of Dallas has had the fifth largest drop in Child Poverty compared to its peer metropolitan cities in the 3-year average.
 
-```{r, Child Poverty Change in Cities Over 1,000,000 Population}
+```{r, Child Poverty Change in Peer Metropolitan Cities}
 plot1MilBar <- cpal_1milCh %>%
   ungroup() %>%
   select(CODE, highlight, cbpChange1y, cbpChange3y) %>%
   pivot_longer(cols = c(cbpChange3y, cbpChange1y)) %>%
-  mutate(name = ifelse(name == "cbpChange3y", "CPAL 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(name = ifelse(name == "cbpChange3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "NYC", "LA", "CHI", "HOU", "PHO", "SAN", "PHI", "SD", "SJ"))) %>%
   ggplot(aes(x=value, y=CODE, fill = highlight)) +
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 0), "%"),
-                x = -0.035),
+                x = 0.007),
                 color = palette_cpal_main[3],
                 fontface = "bold") +
   facet_wrap(~name) +
@@ -535,7 +535,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
-```{r, Poverty by Race/Ethnicity in Cities Over 1,000,000 Population}
+```{r, Poverty by Race/Ethnicity in Peer Metropolitan Cities}
 plotRace1Mil <- cpal_1mil %>%
   select(GEOID, NAME, CODE, YEAR, bp_1y, his_bp_per:wht_bp_per) %>%
   pivot_longer(cols = bp_1y:wht_bp_per, names_to = "race", values_to = "percent") %>%
@@ -621,12 +621,12 @@ plotTexasBar <- cpal_texasCh %>%
   ungroup() %>%
   select(CODE, highlight, cbpChange1y, cbpChange3y) %>%
   pivot_longer(cols = c(cbpChange3y, cbpChange1y)) %>%
-  mutate(name = ifelse(name == "cbpChange3y", "CPAL 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(name = ifelse(name == "cbpChange3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
   mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
   ggplot(aes(x=value, y=CODE, fill = highlight)) +
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 0), "%"),
-                x = 0.03),
+                x = 0.008),
                 color = palette_cpal_main[3],
                 fontface = "bold") +
   facet_wrap(~name) +
