@@ -285,9 +285,9 @@ bp_u18Max <- scales::number(dallasMax$bp_u18_3y, big.mark = ",")
 
 The Child Poverty Rate in the City of Dallas in `r yearMax` is `r cbpMax`
 
-According to estimates from the American Community Survey for `r yearMax`, there are now `r paste0(bp_u18Diff, " ", ifelse(bp_u18Diff > 0, "greater", "fewer"))` children in poverty within the City of Dallas than there were in 2017.
+According to estimates from the American Community Survey for `r yearMax`, there are now `r paste0(str_remove(bp_u18Diff, "-"), " ", ifelse(bp_u18Diff > 0, "greater", "fewer"))` children in poverty within the City of Dallas than there were in 2017.
 
-This poverty rate for all data included in this report is calculated from the 3 year average of 1-year American Community Survey Estimates unless specified as otherwise.
+The poverty rate for all data included in this report is calculated from the 3 year average of 1-year American Community Survey Estimates unless specified as otherwise.
 
 ```{r, Child Poverty in Dallas}
 plotcbpLine <- cpal_dallas %>%
@@ -397,7 +397,7 @@ cpal_plot(zeroGrob(),
 
 # Child Poverty in Peer Metropolitan Cities
 
-Compared to cities with a population over 1,000,000, the City Dallas has the fourth highest Child Poverty Rate in `r yearMax`
+Compared to cities with a population over 1,000,000, the City Dallas had the fourth highest Child Poverty Rate in `r yearMax`
 
 ```{r, Child Poverty Rate in Peer Metropolitan Cities}
 plot1MilLine <- cpal_1mil %>%
@@ -436,7 +436,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
-Between 2021 and 2022 the 3-year average shows that the Child Poverty RAte in all large cities continues to decrease relative to prior years.
+Between 2021 and 2022, the 3-year average shows that the Child Poverty Rate in all large cities continues to decrease relative to prior years.
 
 ```{r, One Year Child Poverty Change in Cities Over 1,000,000 Population}
 plot1MilBar <- cpal_1mil1YrCh %>%
@@ -575,7 +575,7 @@ cpal_plot(zeroGrob(),
 
 # Child Poverty in Peer Texas Cities
 
-Compared to large neighboring Texas cities, the City Dallas has the fourth highest Child Poverty Rate in `r yearMax` in Texas.
+Compared to large neighboring Texas cities, the City of Dallas had the fourth highest Child Poverty Rate in `r yearMax` in Texas.
 
 ```{r, Child Poverty Rate in Texas Cities}
 plot1MilLine <- cpal_texas %>%
@@ -670,7 +670,7 @@ cpal_texas %>%
   formatStyle(columns = colnames(.), fontFamily = "Poppins")
 ```
 
-Since 2017 the City of Dallas has had the `largest drop in Child Poverty compared to its peer Texas cities.
+Since 2017 the City of Dallas has had the largest drop in Child Poverty compared to its peer Texas cities.
 
 ```{r, Child Poverty Change in Texas Cities 2017 to 2022}
 plotTexasBar <- cpal_texasCh %>%
