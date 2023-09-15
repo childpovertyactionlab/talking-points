@@ -614,9 +614,65 @@ cpal_plot(zeroGrob(),
 
 ```
 
+```{r, Child Poverty Change in Texas Cities 2021 to 2022}
+plotTexasBar <- cpal_texas1YrCh %>%
+  ungroup() %>%
+  select(CODE, highlight, cbpChange1y, cbpChange3y) %>%
+  pivot_longer(cols = c(cbpChange3y, cbpChange1y)) %>%
+  mutate(name = ifelse(name == "cbpChange3y", "ACS 3-Year Average", "ACS 1-Year Survey")) %>%
+  mutate(CODE = factor(CODE, levels = c("DAL", "HOU", "ELP", "AUS", "SAN", "FTW"))) %>%
+  ggplot(aes(x=value, y=CODE, fill = highlight)) +
+  geom_bar(stat = "identity", width = 0.8) +
+  geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
+                x = 0.012),
+                color = palette_cpal_main[3],
+                fontface = "bold") +
+  facet_wrap(~name) +
+  scale_fill_manual(values = palette_cpal_main) +
+  scale_x_continuous(labels = scales::percent,
+                     expand = c(0, 0)) +
+  labs(x = "",
+       y = "") +
+  theme_cpal_print() +
+  theme(legend.position = "NONE")
+
+cpal_plot(zeroGrob(),
+          cpal_title(string = paste0("Percent Change in Child Poverty in Peer Texas Cities (2021 to ", max(cpal_1mil$YEAR), ")")),
+          plotTexasBar, 
+          cpal_source(text = "U.S. Census Bureau. American Community Survey Table S1702, 1-year estimates. (2017-2022)"),
+          cpal_note(text = "2020 ACS Estimates are derived from 5-Year ACS due to pandemic collection issues."),
+          zeroGrob(),
+          cpal_logo_text(), 
+          ncol = 1,
+          heights = c(1, 3, 30, 1, 1, 1, 2))
+```
+
+### Child Poverty Metrics in Peer Texas Cities Table
+```{r, Child Poverty Table Peer Texas Cities}
+cpal_texas %>%
+  ungroup(.) %>%
+  filter(YEAR %in% c(2022)) %>%
+  select(NAME, YEAR, CODE, cbp_3y, cbp_1y, bp_u18_1y, bp_u18_3y) %>%
+  mutate(childpov1y = paste0(scales::number(bp_u18_1y, big.mark = ","), " (", scales::percent(cbp_1y, accuracy = 0.1), ")"),
+         childpov3y = paste0(scales::number(bp_u18_3y, big.mark = ","), " (", scales::percent(cbp_3y, accuracy = 0.1), ")")) %>%
+  select(-YEAR, -NAME, -(cbp_3y:bp_u18_3y)) %>%
+  pivot_longer(cols = c(childpov3y, childpov1y)) %>%
+  pivot_wider(names_from = name, values_from = value) %>%
+  rename('City' = CODE,
+         'ACS 3-Year Average' = childpov3y,
+         'ACS 1-Year Survey' = childpov1y) %>%
+  datatable(options = list(paging = FALSE,
+                           searching = FALSE,
+                           info = FALSE
+                           ),
+            rownames = FALSE) %>%
+  formatStyle(columns = colnames(.), fontWeight = 'bold', `text-align` = 'left') %>%
+  formatStyle(columns = colnames(.), fontFamily = "Poppins")
+```
+
 Since 2017 the City of Dallas has had the `largest drop in Child Poverty compared to its peer Texas cities.
 
-```{r, Child Poverty Change in Texas Cities}
+```{r, Child Poverty Change in Texas Cities 2017 to 2022}
 plotTexasBar <- cpal_texasCh %>%
   ungroup() %>%
   select(CODE, highlight, cbpChange1y, cbpChange3y) %>%
