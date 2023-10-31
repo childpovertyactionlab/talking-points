@@ -1,5 +1,5 @@
 ---
-title: "Child Poverty Talking Points"
+title: "Child Poverty in the City of Dallas"
 ---
 
 ```{r, Load Data}
@@ -272,8 +272,6 @@ bp_u18Chg <- scales::percent((bp_u18Max-bp_u18Min)/bp_u18Min, accuracy = 0.1)
 
 bp_u18Max <- scales::number(dallasMax$bp_u18_3y, big.mark = ",")
 ```
-
-# Child Poverty in the City of Dallas
 
 The Child Poverty Rate in the City of Dallas in `r yearMax` is `r cbpMax`
 
