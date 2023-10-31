@@ -1,13 +1,5 @@
 ---
 title: "Child Poverty Talking Points"
-title-block-banner: TRUE
-fig-dpi: 300
-fig-width: 6
-fig-height: 4
-warning: FALSE
-error: TRUE
-echo: FALSE
-message: FALSE
 ---
 
 ```{r, Load Data}
