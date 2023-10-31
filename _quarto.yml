@@ -1,16 +1,37 @@
 project:
   type: website
   output-dir: "docs"
-  title: ""
 format:
   html:
     theme: www/web_report.scss
+    toc-title: Contents
     toc: true
     toc-depth: 2
+    toc-location: right
     anchor-sections: false
+    code-summary: "Reveal Code"
+    code-copy: hover
+    code-fold: true
+    smooth-scroll: true
+    grid:
+      sidebar-width: 250px
+      body-width: 900px
+      margin-width: 300px
+    code-block-bg: true
+    code-block-border-left: "#008097"
+    fig-width: 9
+    fig-height: 7
+    fig-dpi: 300
+    warning: FALSE
+    error: TRUE
+    echo: FALSE
+    message: FALSE
 website:
+  search:
+    location: navbar
+    type: textbox
   favicon: www/images/CPAL_favicon.ico
-  description: A web report containing up to date American Community Survey metrics for cities and regions in North Texas supporting work by the Child Poverty Action Lab.
+#  description: Description of this web report.
 #  site-url:
 #  repo-url:
 #  google-analytics:
@@ -28,4 +49,4 @@ website:
           href: "https://github.com/childpovertyactionlab/"
   page-footer:
     center: Copyright 2023 <b>[The Child Poverty Action Lab](https://childpovertyactionlab.org/).</b>
-    background: "#008097"
+    background: "#042D33"
