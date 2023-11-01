@@ -320,7 +320,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
-### Child Poverty Metrics Table
+#### Child Poverty Metrics Table
 
 ```{r, Child Poverty in Dallas Table}
 cpal_dallas %>%
@@ -464,7 +464,7 @@ cpal_plot(zeroGrob(),
 
 ```
 
-### Child Poverty Metrics in Peer Metropolitan Cities Table
+#### Child Poverty Metrics in Peer Metropolitan Cities Table
 ```{r, Child Poverty Table Peer Metropoloitan Cities}
 cpal_1mil %>%
   ungroup(.) %>%
@@ -637,7 +637,7 @@ cpal_plot(zeroGrob(),
           heights = c(1, 3, 30, 1, 1, 1, 2))
 ```
 
-### Child Poverty Metrics in Peer Texas Cities Table
+#### Child Poverty Metrics in Peer Texas Cities Table
 ```{r, Child Poverty Table Peer Texas Cities}
 cpal_texas %>%
   ungroup(.) %>%
