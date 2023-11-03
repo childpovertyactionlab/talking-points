@@ -4,16 +4,12 @@ title: "Child Poverty in the City of Dallas"
 
 ```{r, Load Data}
 #| include: FALSE
-#| 
 #####  Load Libraries #####
 library(tidycensus)
 library(tidyverse)
 library(rio)
 library(sf)
-#library(directlabels)
 library(cpaltemplates)
-#library(terra)
-#library(magick)
 library(plotly)
 library(DT)
 
@@ -289,10 +285,10 @@ ggplot(aes(x=YEAR, y=value, color = name)) +
   geom_line(linewidth = 1, alpha = 0.8) +
 #  geom_text(aes(label = paste0(round(value*100, digits = 1), "%")),
 #            position = position_stack(vjust = 1.1),
-#            color = palette_cpal_main[3],
+#            color = palette_cpal_five[3],
 #            fontface = "bold") +
   geom_point(size = 3) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_size_manual(values=c(2, 1)) +
   scale_y_continuous(limits = c(0, 0.40),
                      breaks = c(0, 0.1, 0.2, 0.3, 0.4),
@@ -357,7 +353,7 @@ plotRaceLine <- cpal_dallas %>%
   ggplot(aes(x=YEAR, y=percent, color = race, group = race)) +
   geom_line(linewidth = 1, alpha = 0.8) +
   geom_point(size = 3) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_size_manual(values=c(2, 1)) +
   scale_y_continuous(limits = c(0, 0.35),
                      breaks = c(0, 0.1, 0.2, 0.3),
@@ -396,7 +392,7 @@ plot1MilLine <- cpal_1mil %>%
   ggplot(aes(x=YEAR, y=cbp_3y, group = CODE, color = highlight)) +
   geom_line(linewidth = 1.5) +
   geom_point(size = 2) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_y_continuous(limits = c(0, 0.45),
                      breaks = c(0, 0.1, 0.2, 0.3, 0.4),
                      labels = scales::percent,
@@ -439,10 +435,10 @@ plot1MilBar <- cpal_1mil1YrCh %>%
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
                 x = 0.035),
-                color = palette_cpal_main[3],
-                fontface = "bold") +
+            color = "black",
+            fontface = "bold") +
   facet_wrap(~name) +
-  scale_fill_manual(values = palette_cpal_main) +
+  scale_fill_manual(values = palette_cpal_five) +
   scale_x_continuous(labels = scales::percent,
                      expand = c(0, 0)) +
   labs(x = "",
@@ -500,10 +496,10 @@ plot1MilBar <- cpal_1milCh %>%
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
                 x = 0.008),
-                color = palette_cpal_main[3],
+            color = "black",
                 fontface = "bold") +
   facet_wrap(~name) +
-  scale_fill_manual(values = palette_cpal_main) +
+  scale_fill_manual(values = palette_cpal_five) +
   scale_x_continuous(labels = scales::percent,
                      expand = c(0, 0)) +
   labs(x = "",
@@ -538,7 +534,7 @@ plotRace1Mil <- cpal_1mil %>%
   filter(YEAR >= max(cpal_1mil$YEAR)) %>%
   ggplot(aes(x=percent, y=CODE, color = race)) +
   geom_point(size = 2) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_x_continuous(limits = c(0, 0.32),
                      breaks = c(0, 0.1, 0.2, 0.3),
                      labels = scales::percent,
@@ -574,7 +570,7 @@ plot1MilLine <- cpal_texas %>%
   ggplot(aes(x=YEAR, y=cbp_3y, group = CODE, color = highlight)) +
   geom_line(linewidth = 1.5) +
   geom_point(size = 3) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_y_continuous(limits = c(0, 0.45),
                      breaks = c(0, 0.1, 0.2, 0.3, 0.4),
                      labels = scales::percent,
@@ -615,10 +611,10 @@ plotTexasBar <- cpal_texas1YrCh %>%
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
                 x = 0.012),
-                color = palette_cpal_main[3],
+            color = "black",
                 fontface = "bold") +
   facet_wrap(~name) +
-  scale_fill_manual(values = palette_cpal_main) +
+  scale_fill_manual(values = palette_cpal_five) +
   scale_x_continuous(labels = scales::percent,
                      expand = c(0, 0)) +
   labs(x = "",
@@ -673,10 +669,10 @@ plotTexasBar <- cpal_texasCh %>%
   geom_bar(stat = "identity", width = 0.8) +
   geom_text(aes(label = paste0(round(value*100, digits = 1), "%"),
                 x = 0.029),
-                color = palette_cpal_main[3],
+            color = "black",
                 fontface = "bold") +
   facet_wrap(~name) +
-  scale_fill_manual(values = palette_cpal_main) +
+  scale_fill_manual(values = palette_cpal_five) +
   scale_x_continuous(labels = scales::percent,
                      expand = c(0, 0)) +
   labs(x = "",
@@ -708,7 +704,7 @@ plotRaceTexas <- cpal_texas %>%
   filter(YEAR >= max(cpal_1mil$YEAR)) %>%
   ggplot(aes(x=percent, y=CODE, color = race)) +
   geom_point(size = 2) +
-  scale_color_manual(values = palette_cpal_main) +
+  scale_color_manual(values = palette_cpal_five) +
   scale_x_continuous(limits = c(0, 0.32),
                      breaks = c(0, 0.1, 0.2, 0.3),
                      labels = scales::percent,
